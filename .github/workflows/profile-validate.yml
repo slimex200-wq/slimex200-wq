@@ -1,0 +1,48 @@
+name: Validate profile
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "assets/**"
+      - ".github/workflows/profile-validate.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - "assets/**"
+      - ".github/workflows/profile-validate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out profile
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+
+      - name: Validate README assets and SVGs
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          import xml.etree.ElementTree as ET
+
+          readme = Path("README.md").read_text(encoding="utf-8")
+          local_assets = set(re.findall(r'(?:src|srcset)="(\./assets/[^"]+)"', readme))
+
+          assert local_assets, "README does not reference any local profile assets"
+          for relative_path in sorted(local_assets):
+              asset = Path(relative_path.removeprefix("./"))
+              assert asset.is_file(), f"Missing README asset: {asset}"
+              if asset.suffix == ".svg":
+                  ET.parse(asset)
+
+          assert readme.index("hypeboyo-studio-mobile-dark.svg") < readme.index("hypeboyo-studio-dark.svg")
+          assert readme.index("hypeboyo-studio-mobile-light.svg") < readme.index("hypeboyo-studio-light.svg")
+          print(f"Validated {len(local_assets)} local profile assets")
