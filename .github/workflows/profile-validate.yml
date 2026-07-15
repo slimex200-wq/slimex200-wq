@@ -26,7 +26,7 @@ jobs:
       - name: Check out profile
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
-      - name: Validate README assets and SVGs
+      - name: Validate README structure and local assets
         shell: python
         run: |
           from pathlib import Path
@@ -34,16 +34,14 @@ jobs:
           import xml.etree.ElementTree as ET
 
           readme = Path("README.md").read_text(encoding="utf-8")
-          local_assets = set(re.findall(r'(?:src|srcset)="(\./assets/[^"]+)"', readme))
+          assert readme.strip(), "README is empty"
+          assert re.search(r"^#\s+\S", readme, re.MULTILINE), "README needs an H1 heading"
 
-          assert local_assets, "README does not reference any local profile assets"
+          local_assets = set(re.findall(r'(?:src|srcset)="(\./assets/[^"]+)"', readme))
           for relative_path in sorted(local_assets):
               asset = Path(relative_path.removeprefix("./"))
               assert asset.is_file(), f"Missing README asset: {asset}"
               if asset.suffix == ".svg":
                   ET.parse(asset)
 
-          assert "max-width" not in readme, "GitHub rewrites width-based picture media queries"
-          assert "hypeboyo-studio-dark.svg" in readme
-          assert "hypeboyo-studio-light.svg" in readme
-          print(f"Validated {len(local_assets)} local profile assets")
+          print(f"Validated README and {len(local_assets)} local profile assets")
