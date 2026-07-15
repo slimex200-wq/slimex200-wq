@@ -1,0 +1,47 @@
+name: Validate profile
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "assets/**"
+      - ".github/workflows/profile-validate.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - "assets/**"
+      - ".github/workflows/profile-validate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out profile
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+
+      - name: Validate README structure and local assets
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          import xml.etree.ElementTree as ET
+
+          readme = Path("README.md").read_text(encoding="utf-8")
+          assert readme.strip(), "README is empty"
+          assert re.search(r"^#\s+\S", readme, re.MULTILINE), "README needs an H1 heading"
+
+          local_assets = set(re.findall(r'(?:src|srcset)="(\./assets/[^"]+)"', readme))
+          for relative_path in sorted(local_assets):
+              asset = Path(relative_path.removeprefix("./"))
+              assert asset.is_file(), f"Missing README asset: {asset}"
+              if asset.suffix == ".svg":
+                  ET.parse(asset)
+
+          print(f"Validated README and {len(local_assets)} local profile assets")
