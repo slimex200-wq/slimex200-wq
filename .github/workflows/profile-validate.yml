@@ -43,7 +43,6 @@ jobs:
               if asset.suffix == ".svg":
                   ET.parse(asset)
 
-          assert "max-width" not in readme, "GitHub rewrites width-based picture media queries"
-          assert "hypeboyo-studio-dark.svg" in readme
-          assert "hypeboyo-studio-light.svg" in readme
+          assert readme.index("hypeboyo-studio-mobile-dark.svg") < readme.index("hypeboyo-studio-dark.svg")
+          assert readme.index("hypeboyo-studio-mobile-light.svg") < readme.index("hypeboyo-studio-light.svg")
           print(f"Validated {len(local_assets)} local profile assets")

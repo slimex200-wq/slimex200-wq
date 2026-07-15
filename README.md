@@ -1,4 +1,6 @@
 <picture>
+  <source media="(prefers-color-scheme: dark) and (max-width: 480px)" srcset="./assets/hypeboyo-studio-mobile-dark.svg" />
+  <source media="(prefers-color-scheme: light) and (max-width: 480px)" srcset="./assets/hypeboyo-studio-mobile-light.svg" />
   <source media="(prefers-color-scheme: dark)" srcset="./assets/hypeboyo-studio-dark.svg" />
   <source media="(prefers-color-scheme: light)" srcset="./assets/hypeboyo-studio-light.svg" />
   <img width="100%" alt="Pink Hypeboyo mascot at a tiny studio desk, moving three app ideas from sketch to working product." src="./assets/hypeboyo-studio-light.svg" />
